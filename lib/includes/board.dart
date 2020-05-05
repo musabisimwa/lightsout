@@ -16,9 +16,9 @@ class Board{
     this._width=width;
     this._length=length;
     this._counter =0;
-    _board = new List(width);
+    _board =  List(width);
     for( int i=0; i< _board.length; i++){
-      _board[i] = new List.filled(length, false,growable: false);
+      _board[i] = List.filled(length, false,growable: false);
     }
   }
 
@@ -42,11 +42,22 @@ class Board{
 
   }
 
-
-List<List<bool>> getBoard(){
+  bool isSolved(){
+    int checker=0;
+    for(var i =0;i < _board.length; i++){
+      for(var j=0; j<_board[0].length;j++){
+        if(_board[i][j]==true){
+          checker++;
+        }
+      }
+    }
+    return (checker == (_board.length*_board[0].length));
+  }
+  List<List<bool>> getBoard(){
     return this._board;
 }
-int getCounter(){
+
+  int getCounter(){
     return this._counter;
 }
 

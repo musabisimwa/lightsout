@@ -19,13 +19,62 @@ class _UIBoardState extends State<UIBoard>{
   ///
   /// playable boaard
   Board boardMatrix ;
-  _UIBoardState(){
-    boardMatrix = Board(width: 13,length: 8);
+  final maxWidth= 13;
+  final maxLength =8;
 
-  }
-///  the position of the clicked signal
+
+  var currentLen=2; // length at current level
+  var currentWid=2; // minimum 2x2
+  /// the maximum bulbs that can be displayed on a modern screen grid
+  ///
+  ///  the position of the clicked signal
   int _sigX,_sigY;
   int _counter=0;
+  int level =1;
+ /// if board is
+  bool isCompleted;
+
+ void initState(){
+   super.initState();
+   boardMatrix= Board(width: currentWid,length: currentLen);
+ }
+ Future<Widget> completedDialog({bool complete, VoidCallback onPressNext,
+                         VoidCallback onPressCancel} ){
+  /// creates an alert when the board is solved
+
+   if(complete){
+     print('complete');
+     return showDialog<void>(
+        context: context,
+       builder: (context){
+          return AlertDialog(
+            title: Text("Board complete : Level : $level"),
+            content: Text("Number of moves: $_counter"),
+            backgroundColor: Colors.white,
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Next"),
+                onPressed: (){
+                  Navigator.of(context).pop();
+                  onPressNext();
+                },
+              ),
+              FlatButton(
+                child: Text("Cancel"),
+                onPressed: (){
+                  Navigator.of(context).pop();
+                  onPressCancel();
+                },
+              ),
+
+            ],
+          );
+       }
+     );
+   }else{
+     // do nothing?? really?
+   }
+ }
 
 
 
@@ -55,10 +104,34 @@ class _UIBoardState extends State<UIBoard>{
                               onPressed: (){
                               _sigX=i;
                               _sigY=j;
-                              print("$_sigX $_sigY");
+
                               setState(() {
                                 board.boardClick(j, i);
+                                isCompleted = board.isSolved();
                                 _counter =board.getCounter();
+                                counter();
+                                completedDialog(
+                                  complete: isCompleted,
+                                  onPressNext: (){
+
+                                    if(currentLen < maxLength){
+                                      currentLen++;
+                                      currentWid++;
+                                    }else if(currentWid<maxWidth &&
+                                        currentLen==maxLength){
+                                      currentWid++;
+                                    }
+
+                                    level++;
+                                    setState(() {
+
+                                      boardMatrix =Board(length: currentLen,
+                                          width: currentWid);
+
+                                    });
+                                  }
+                                );
+
                               });
                               });
      }
@@ -70,7 +143,7 @@ class _UIBoardState extends State<UIBoard>{
    for(var i=0; i<width; i++){
      column[i]=Row(
        children: grid[i],
-       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+       mainAxisAlignment: MainAxisAlignment.center,
      );
    }
 
@@ -80,7 +153,22 @@ class _UIBoardState extends State<UIBoard>{
      );
     return gridLayout;
   }
+  Widget counter(){
+   var signal ={
+     'success':Colors.green,
+     'fair':Colors.yellow,
+     'danger':Colors.red
+   };
+   Color sigColor =signal['success'] ;
+   var size = boardMatrix.getBoard().length*
+       boardMatrix.getBoard()[0].length;
+   if(_counter ==size){
+     sigColor =signal['success'];
+    }else{ sigColor =signal['danger'];}
 
+   return Text("$_counter",
+       style: TextStyle(fontSize: 40, color: sigColor));
+  }
 
   Widget bulbState({bool state, VoidCallback onPressed}){
     Widget _bulbOff= Container(
@@ -112,10 +200,7 @@ class _UIBoardState extends State<UIBoard>{
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown
     ]);
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-
-      home: Scaffold(
+    return  Scaffold(
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.blueGrey[600],
           items: <BottomNavigationBarItem>[BottomNavigationBarItem(
@@ -125,6 +210,7 @@ class _UIBoardState extends State<UIBoard>{
                 setState(() {
                   boardMatrix.reset(enhanced: false);
                   _counter  =boardMatrix.getCounter();
+                  level=0;
                 });
               },
 
@@ -140,10 +226,12 @@ class _UIBoardState extends State<UIBoard>{
             BottomNavigationBarItem(
               icon: Icon(Icons.add, color: Colors.blueGrey[600],),
               title: Column(
-                children: <Widget>[ Text("Light score",
+                children: <Widget>[
+                  Text("Moves",
                   style: TextStyle(fontSize: 16,
                     fontStyle: FontStyle.italic,color: Colors.white),),
-                  Text("$_counter", style: TextStyle(fontSize: 40, color: Colors.white),)],
+                  counter()
+                ],
               )
             ),
 
@@ -172,6 +260,6 @@ class _UIBoardState extends State<UIBoard>{
         child :Container( child: boardLight(boardMatrix)
         ),
         )
-      ),
-    );}
+      );
+ }
 }

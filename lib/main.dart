@@ -1,11 +1,15 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'includes/lights.dart';
-void main(){
-
-  runApp(UIBoard());
+import 'package:lights/includes/lights.dart';
+main(){
+  runApp(Light());
 }
-
-
-
+class Light extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home:UIBoard()
+    );
+  }
+}
